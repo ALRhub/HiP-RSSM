@@ -1,8 +1,0 @@
-hydra:
-  run:
-    dir: ./
-  sweep:
-    dir: ./
-defaults:
-  - model: default
-  - sweep: null
