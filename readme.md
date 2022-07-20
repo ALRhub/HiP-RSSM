@@ -2,7 +2,7 @@
 Pytorch code for ICLR 2022 paper [Hidden Parameter Recurrent State Space Models For Changing Dynamics Scenarios](https://openreview.net/forum?id=ds8yZOUsea). The algorithm learns
 deep multi task Kalman Filters that can be used in non-stationary environments with changing dynamics.
 
-<img src="/Pics/img.png" alt="drawing" style="width:300px;"/>
+<img src="/pics/img.png" alt="drawing" style="width:300px;"/>
 
 Dependencies
 --------------
@@ -36,5 +36,5 @@ in this [reference](https://openreview.net/pdf?id=HyztsoC5Y7).
 
 A detailed description for creating training datasets is given in Appendix E.
 A detailed description for testtime inference procedure is given in Algorithm 1 in the appendix.
-![Alt text](/Pics/img_1.png?raw=true "Test time inference")
+![Alt text](/pics/img_1.png?raw=true "Test time inference")
 
