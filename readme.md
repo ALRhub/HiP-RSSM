@@ -32,7 +32,7 @@ For any dataset with a long timeseries, split them to reasonable local trajector
 fed into the hiprssm model.
 The first K would used by context encoder to infer latent context and the last K would be used as target set.
 The concept is very similar to context sets and target sets in [Neural Processes](https://arxiv.org/abs/1807.01622) or the meta testing procedure used
-in this [reference](/https://openreview.net/pdf?id=HyztsoC5Y7).
+in this [reference](https://openreview.net/pdf?id=HyztsoC5Y7).
 
 A detailed description for creating training datasets is given in Appendix E.
 A detailed description for testtime inference procedure is given in Algorithm 1 in the appendix.
