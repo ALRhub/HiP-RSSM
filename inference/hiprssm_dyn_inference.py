@@ -15,10 +15,12 @@ nn = torch.nn
 
 class Infer:
 
-    def __init__(self, model: HipRSSM, normalizer, config:ConfigDict = None, run = None, log=True, use_cuda_if_available: bool = True):
+    def __init__(self, model: HipRSSM, normalizer, config = None, run = None, log=True, use_cuda_if_available: bool = True):
 
         """
         :param model: nn module for HiP-RSSM
+        :param normalizer: dictionary with normalization constants
+        :param config: config dict
         :param use_cuda_if_available:  if to use gpu
         """
         assert run is not None, 'Enter a valid wandb run'

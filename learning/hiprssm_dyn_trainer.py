@@ -22,11 +22,14 @@ nn = torch.nn
 
 class Learn:
 
-    def __init__(self, model: HipRSSM, loss: str, imp: float = 0.0, config: ConfigDict = None, run = None, log=True, use_cuda_if_available: bool = True):
+    def __init__(self, model: HipRSSM, loss: str, imp: float = 0.0, config = None, run = None, log=True, use_cuda_if_available: bool = True):
         """
         :param model: nn module for np_dynamics
         :param loss: type of loss to train on 'nll' or 'mse'
-        :param imp: how much to impute
+        :param imp: how much to impute (useful for longterm predictions)
+        :param config: dict of configs
+        :param run: wandb object for experiment tracking
+        :param log: whether to use wandb for experiment tracking and logging
         :param use_cuda_if_available: if gpu training set to True
         """
         assert run is not None, 'pass a valid wandb run'
@@ -62,7 +65,7 @@ class Learn:
         :param train_targets: training targets
         :param train_task_idx: task ids per episode
         :param batch_size: batch size for each gradient update
-        :return: average loss (nll) and  average metric (rmse), execution time
+        :return: average loss (nll or rmse a you choose),average metric (rmse and nll again), latent varibles to visulize, ground truth task variables, execution time
         """
         self._model.train()
         dataset = TensorDataset(train_obs, train_act, train_targets, train_task_idx)
