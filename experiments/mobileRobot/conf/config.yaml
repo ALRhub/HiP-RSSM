@@ -1,0 +1,8 @@
+hydra:
+  run:
+    dir: ./
+  sweep:
+    dir: ./
+defaults:
+  - model: default_np
+  - sweep: null
