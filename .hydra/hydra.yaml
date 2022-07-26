@@ -109,10 +109,10 @@ hydra:
   overrides:
     hydra: []
     task:
-    - model=default
+    - model=default_lstm
   job:
-    name: mobile_robot_hiprssm
-    override_dirname: model=default
+    name: mobile_robot_lstm
+    override_dirname: model=default_lstm
     id: ???
     num: ???
     config_name: config
@@ -138,7 +138,7 @@ hydra:
       provider: schema
     choices:
       sweep: null
-      model: default
+      model: default_lstm
       hydra/env: default
       hydra/callbacks: null
       hydra/job_logging: default

@@ -1,63 +1,31 @@
 model:
   wandb:
     log: true
-    project_name: HiPPO
-    exp_name: mobile-hiprssm
-    sweep: false
-    sweep_id: null
+    project_name: baselines-mobile-------------
+    exp_name: mobile-lstm
   learn:
     load: false
     gpu: '0'
+    lr: 0.01
     epochs: 2
-    batch_size: 350
-    latent_vis: false
-    plot_traj: false
-    lr: 0.0008
-    save_model: true
-    loss: nll
-  hiprssm:
-    clip_gradients: true
-    latent_obs_dim: 30
-    task_dim: 60
-  set_encoder:
-    encoder_hidden_units:
+    batch_size: 500
+  lstm:
+    latent_obs_dim: 15
+    act_enc_hidden_units:
+    - 120
+    obs_enc_hidden_units:
     - 240
-    aggregator: BA
-    enc_out_norm: post
-    variance_act: softplus
-  ssm_decoder:
-    kalman_linear: false
-    num_basis: 15
-    bandwidth: 3
-    enc_net_hidden_units:
+    enc_hidden_units:
     - 120
-    dec_net_hidden_units:
+    dec_hidden_units:
     - 240
-    trans_net_hidden_units: []
-    control_net_hidden_units:
-    - 120
-    task_net_hidden_units:
-    - 120
-    process_noise_hidden_units:
-    - 30
-    trans_net_hidden_activation: Tanh
-    control_net_hidden_activation: ReLU
-    process_noise_hidden_activation: ReLU
-    task_net_hidden_activation: ReLU
-    learn_trans_covar: true
-    decoder_conditioning: false
-    additive_nl_task: true
-    nl_diagonal: true
-    multi_gaussian_l_transform: false
-    trans_covar: 0.1
-    learn_initial_state_covar: false
-    initial_state_covar: 10
     enc_out_norm: post
     clip_gradients: true
     never_invalid: false
-    variance_act: softplus
+    get_latent: false
+    gru: true
   data_reader:
-    imp: 0
+    imp: 0.5
     terrain: sin2
     frequency: '500'
     meta_batch_size: 3000
@@ -65,6 +33,7 @@ model:
     tar_type: delta
     load: null
     save: 1
+    dim: 111
     standardize: true
     split:
     - - 0
@@ -118,15 +87,5 @@ model:
       - 39
       - 40
     shuffle_split: null
-    file_name: MobileWindows
+    file_name: MobileWindows_123_0
     trajPerTask: 10
-  submitit:
-    folder: ./experiments/mujoco_meta/Ant/slurm_output/
-    name: jobtrial
-    timeout_min: 10
-    mem_gb: 10
-    nodes: 1
-    cpus_per_task: 3
-    gpus_per_node: 1
-    tasks_per_node: 1
-    slurm_partition: gpu

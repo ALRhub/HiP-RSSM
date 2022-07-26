@@ -21,7 +21,6 @@ hiprssm:
   latent_obs_dim: 30
   task_dim: 60
 
-
 set_encoder:
   encoder_hidden_units: [240]
   aggregator: 'BA'
@@ -56,7 +55,7 @@ ssm_decoder:
   variance_act: 'softplus'
 
 data_reader:
-  imp: 0
+  imp: 0 #How much imputation you need... For multistep ahead prediction we train with an imputation percentage of 0.75
   terrain: 'sin2'
   frequency: '500'
   meta_batch_size: 3000

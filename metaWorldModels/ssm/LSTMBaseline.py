@@ -2,17 +2,16 @@ import torch
 import numpy as np
 from utils.TimeDistributed import TimeDistributed
 import time as t
-from dynamics_models.rkn.acrkn.Encoder import Encoder, EncoderSimple
-from dynamics_models.rkn.acrkn.Decoder import SplitDiagGaussianDecoder, SimpleDecoder
+from metaWorldModels.ssm.ssmEncoderDecoder.Encoder import EncoderSimple
+from metaWorldModels.ssm.ssmEncoderDecoder.Decoder import SimpleDecoder
 from typing import Tuple
-from utils.ConfigDict import ConfigDict
 optim = torch.optim
 nn = torch.nn
 
 
 class LSTMBaseline(nn.Module):
 
-    def __init__(self, target_dim: int, lod: int, lad:int, cell_config: ConfigDict=None, use_cuda_if_available: bool = True):
+    def __init__(self, obs_dim:int, act_dim:int, target_dim: int, lod: int, cell_config = None, use_cuda_if_available: bool = True):
         """
         TODO: Gradient Clipping?
         :param target_dim:
@@ -23,9 +22,15 @@ class LSTMBaseline(nn.Module):
         super(LSTMBaseline, self).__init__()
         self._device = torch.device("cuda" if torch.cuda.is_available() and use_cuda_if_available else "cpu")
 
+        self._obs_dim = obs_dim
+        self._act_dim = act_dim
+
         self._lod = lod
         self._lsd = 2 * self._lod
-        self.c = cell_config
+        if cell_config is None:
+            raise TypeError('Pass a Config Dict')
+        else:
+            self.c = cell_config
 
         # parameters
         self._enc_out_normalization = self.c.enc_out_norm

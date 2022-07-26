@@ -8,7 +8,7 @@ import wandb
 
 
 def plotImputation(gts, valid_flags, pred_mus, pred_stds, wandb_run, dims=None, num_traj: int =2, log_name='test', exp_name='trial', show=False):
-    folder_name = os.getcwd() + '/experiments/pam/runs/latent_plots'
+    folder_name = os.getcwd() + '/experiments/mobileRobot/runs/latent_plots'
     trjs = np.random.randint(gts.shape[0],size=num_traj)
     if dims is None:
         dims = np.arange(gts.shape[-1])

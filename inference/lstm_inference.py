@@ -1,13 +1,11 @@
-import time as t
 from typing import Tuple
 
 import numpy as np
 import torch
-from dynamics_models.rkn.acrkn.LSTMBaseline import LSTMBaseline
+from metaWorldModels.ssm.LSTMBaseline import LSTMBaseline
 from torch.utils.data import TensorDataset, DataLoader
 from utils.dataProcess import split_k_m, get_sliding_context_batch_mbrl, get_ctx_target_multistep, get_ctx_target_impute,\
     squeeze_sw_batch, diffToStateMultiStep, diffToState, diffToStateImpute
-from utils import ConfigDict
 
 optim = torch.optim
 nn = torch.nn
@@ -15,7 +13,7 @@ nn = torch.nn
 
 class Infer:
 
-    def __init__(self, model: LSTMBaseline,  data= None, config:ConfigDict = None, run = None, log=True, use_cuda_if_available: bool = True):
+    def __init__(self, model: LSTMBaseline,  normalizer= None, config = None, run = None, log=True, use_cuda_if_available: bool = True):
 
         """
         :param model: nn module for acrkn
@@ -24,7 +22,7 @@ class Infer:
         assert run is not None, 'Enter a valid wandb run'
         self._device = torch.device("cuda" if torch.cuda.is_available() and use_cuda_if_available else "cpu")
         self._model = model
-        self._data = data
+        self._normalizer = normalizer
         if config is None:
             raise TypeError('Pass a Config Dict')
         else:
@@ -89,10 +87,10 @@ class Infer:
 
                 if tar == "delta":
                     out_mean = \
-                        torch.from_numpy(diffToStateImpute(out_mean, tar_obs_batch, tar_obs_valid_batch, self._data,
+                        torch.from_numpy(diffToStateImpute(out_mean, tar_obs_batch, tar_obs_valid_batch, self._normalizer,
                                              standardize=True)[0])
                     tar_tar_batch = \
-                        torch.from_numpy(diffToState(tar_tar_batch, tar_obs_batch, self._data, standardize=True)[0])
+                        torch.from_numpy(diffToState(tar_tar_batch, tar_obs_batch, self._normalizer, standardize=True)[0])
 
                 out_mean_list.append(out_mean.cpu())
                 out_var_list.append(out_var.cpu())
@@ -208,9 +206,9 @@ class Infer:
                 # Diff To State
                 if tar == "delta":
                     out_mean = \
-                    diffToStateMultiStep(out_mean, tar_obs_batch, tar_obs_valid_batch, self._data, standardize=True)[0]
+                    diffToStateMultiStep(out_mean, tar_obs_batch, tar_obs_valid_batch, self._normalizer, standardize=True)[0]
                     tar_tar_batch = \
-                        diffToState(tar_tar_batch, tar_obs_batch, self._data, standardize=True)[0]
+                        diffToState(tar_tar_batch, tar_obs_batch, self._normalizer, standardize=True)[0]
 
                 # Squeeze To Original Episode From Hyper Episodes
 

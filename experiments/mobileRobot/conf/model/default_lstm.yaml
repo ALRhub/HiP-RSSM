@@ -1,0 +1,42 @@
+wandb:
+  log: True
+  project_name: 'baselines-mobile-------------'
+  exp_name: 'mobile-lstm'
+
+learn:
+  load: False
+  gpu: '0'
+  lr: 1e-2
+  epochs: 1000
+  batch_size: 500
+
+lstm:
+  latent_obs_dim: 15
+  act_enc_hidden_units: [120]
+  obs_enc_hidden_units: [240]
+  enc_hidden_units: [120]
+  dec_hidden_units: [240]
+  enc_out_norm: 'post'
+  clip_gradients: True
+  never_invalid: False
+  get_latent: False
+  gru: False
+
+
+data_reader:
+  imp: 0.50
+  terrain: 'sin2'
+  frequency: '500'
+  meta_batch_size: 3000
+  batch_size: 150
+  tar_type: 'delta'
+  load: null
+  save: 1
+  dim: 111
+  standardize: True
+  split:
+    - [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49]
+    - [30,31,32,33,34,35,36,37,38,39,40]
+  shuffle_split: null
+  file_name: 'MobileWindows_123_0'
+  trajPerTask: 10

@@ -38,3 +38,12 @@ A detailed description for creating training datasets is given in Appendix E.
 A detailed description for testtime inference procedure is given in Algorithm 1 in the appendix.
 ![Alt text](/pics/img_1.png?raw=true "Test time inference")
 
+How To Run Baselines
+-------------
+With ```HiP-RSSM``` as the working directory execute the python script
+* LSTM Baseline:
+```python experiments/mobileRobot/mobile_robot_lstm.py model=default_lstm```
+* GRU Baseline:
+```python experiments/mobileRobot/mobile_robot_lstm.py model=default_lstm```
+* RKN Baseline:
+```python experiments/mobileRobot/mobile_robot_hiprssm.py model=default_rkn```
