@@ -26,8 +26,7 @@ model:
     enc_out_norm: post
     variance_act: softplus
   ssm_decoder:
-    hippo: true
-    kalman_linear: true
+    kalman_linear: false
     num_basis: 15
     bandwidth: 3
     enc_net_hidden_units:

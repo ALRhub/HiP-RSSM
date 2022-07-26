@@ -29,8 +29,7 @@ set_encoder:
   variance_act: 'softplus'
 
 ssm_decoder:
-  hippo: True
-  kalman_linear: True
+  kalman_linear: False
   num_basis: 15
   bandwidth: 3
   enc_net_hidden_units: [ 120 ]
