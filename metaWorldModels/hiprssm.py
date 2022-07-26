@@ -3,7 +3,6 @@ import sys
 sys.path.append('.')
 import numpy as np
 import torch
-from omegaconf import OmegaConf
 
 from metaWorldModels.setEncoders.setFunctionContext import SetEncoder
 from metaWorldModels.ssm.contextualRSSM.contextualRKN import acrknContextualDecoder
@@ -12,29 +11,23 @@ optim = torch.optim
 nn = torch.nn
 
 class HipRSSM(nn.Module):
-    @staticmethod
-    def get_default_config() -> OmegaConf:
-        config = """
-        clip_gradients: True
-        latent_obs_dim: 30
-        agg_dim: 60
-        """
-        return OmegaConf.create(config)
-
     '''
-    Note that the aggregator is considered as an integral part of the encoder
+    The HiP-RSSM Module with the set encoder and a contextual ssm decoder.
+    Note that the aggregator is considered as an integral part of the set encoder.
     '''
     def __init__(self, obs_dim, action_dim, target_dim, config=None, dtype=torch.float32,
                  use_cuda_if_available: bool = True):
         '''
-        encoder: context encoder and aggregator
-        decoder: target decoder
-        dec_type: 'acrkn' or 'ffnn'
-        latent_variance: If True, decode the task level variance as well
+        :param obs_dim:  observation dim
+        :param action_dim: action dim
+        :param target_dim: target dimension
+        :param config: dict of configs
+        :param dtype: datatype
+        :param use_cuda_if_available: if gpu training set to True
         '''
         super(HipRSSM, self).__init__()
-        if config == None:
-            self.c = self.get_default_config()
+        if config is None:
+            raise TypeError('Pass a Config Dict')
         else:
             self.c = config
         self._device = torch.device("cuda" if torch.cuda.is_available() and use_cuda_if_available else "cpu")

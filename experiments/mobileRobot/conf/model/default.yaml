@@ -45,13 +45,8 @@ ssm_decoder:
   task_net_hidden_activation: 'ReLU'
   learn_trans_covar: True
   decoder_conditioning: False
-  additive_linear_task: False
-  additive_linear_task_factorized: False
-  additive_l_linear_task_factorized: False
   additive_nl_task: True
-  additive_nl_task_deterministic: False
   nl_diagonal: True
-  additive_ll_task: False
   multi_gaussian_l_transform: False
   trans_covar: 0.1
   learn_initial_state_covar: False
@@ -60,7 +55,6 @@ ssm_decoder:
   clip_gradients: True
   never_invalid: False
   variance_act: 'softplus'
-  num_heads: 1
 
 data_reader:
   imp: 0

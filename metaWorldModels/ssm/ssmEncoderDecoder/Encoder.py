@@ -11,7 +11,7 @@ def elup1(x: torch.Tensor) -> torch.Tensor:
 class Encoder(nn.Module):
 
     def __init__(self, lod: int, output_normalization: str = "post", activation='softplus'):
-        """Gaussian Encoder, as described in ICML Paper (if output_normalization=post)
+        """Gaussian Encoder, as described in ICLR Paper (if output_normalization=post)
         :param lod: latent observation dim, i.e. output dim of the Encoder mean and var
         :param output_normalization: when to normalize the output:
             - post: after output layer (as described in ICML paper)

@@ -62,18 +62,6 @@ def gaussian_linear_transform_task(lm: torch.Tensor, mu_l: torch.Tensor, covar_l
     cov_prior = cov_linear_transform_task(lm_batched, covar_l)
     return mu_prior, cov_prior
 
-def gaussian_linear_transform_task_factorized(lm: torch.Tensor, mu_l: torch.Tensor, covar_l:torch.Tensor):
-    lm_batched = lm.repeat((mu_l.shape[0],1))
-    mu_prior = lm_batched*mu_l
-
-    cov_prior = cov_linear_transform_task_factorized(lm_batched, covar_l)
-    return mu_prior, cov_prior
-
-def gaussian_l_linear_transform_task_factorized(lm: torch.Tensor, mu_l: torch.Tensor, covar_l:torch.Tensor):
-    mu_prior = lm*mu_l
-
-    cov_prior = cov_linear_transform_task_factorized(lm, covar_l)
-    return mu_prior, cov_prior
 
 def gaussian_non_linear_transform_task(lm: torch.Tensor, mu_l: torch.Tensor, covar_l:torch.Tensor):
     #lm_batched = lm.repeat((mu_l.shape[0],1, 1))
@@ -91,21 +79,6 @@ def cov_linear_transform_task(tm: torch.Tensor, covar: torch.Tensor):
     ncl = dadat(tm21, covar)
     ncs = dadbt(tm21, covar, tm11)
     return [ncu, ncl, ncs]
-
-def cov_linear_transform_task_factorized(lm: torch.Tensor, covar: torch.Tensor):
-
-    # predict next prior covariance (eq 10 - 12 in paper supplement)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    covar_new = lm**2 * covar
-
-    lod = int(covar.shape[-1] / 2)
-
-    ncu = covar_new[:, :lod]
-    ncl = covar_new[:, lod:]
-    ncs = torch.zeros(ncu.shape[0], ncu.shape[1]).to(device)
-    return [ncu, ncl, ncs]
-
-
 
 
 def cov_linear_transform(tm: List, covar: List, process_covar):
@@ -315,38 +288,6 @@ class Coefficient(nn.Module):
 
 class AcPredict(nn.Module):
 
-    @staticmethod
-    def get_default_config() -> OmegaConf:
-        s = """
-                num_basis: 15
-                bandwidth: 3
-                enc_net_hidden_units: 
-                    - 120
-                dec_net_hidden_units: 
-                    - 120
-                trans_net_hidden_units:
-                    - 120
-                control_net_hidden_units:
-                    - 120
-                    - 120
-                    - 120
-                process_noise_hidden_units:
-                    - 30
-                trans_net_hidden_activation: "Tanh"
-                control_net_hidden_activation: 'ReLU'
-                process_noise_hidden_activation: 'ReLU'
-                learn_trans_covar: False
-                trans_covar: 0.1
-                learn_initial_state_covar: True
-                initial_state_covar: 10
-                learning_rate: 7e-3
-                enc_out_norm: 'post'
-                clip_gradients: True
-                never_invalid: False
-                """
-
-        return OmegaConf.create(s)
-
     def __init__(self, ltd: int, latent_obs_dim: int, act_dim: int, config: ConfigDict = None, dtype: torch.dtype = torch.float32):
         """
         RKN Cell (mostly) as described in the original RKN paper
@@ -360,15 +301,12 @@ class AcPredict(nn.Module):
         self._lsd = 2 * self._lod
         self._lad = act_dim
 
-        if config == None:
-
-            self.c = self.get_default_config()
+        if config is None:
+            raise TypeError('Pass a Config Dict')
         else:
            self.c = config
 
         self._dtype = dtype
-
-
 
         self._build_transition_model()
         self._build_task_model()
@@ -397,18 +335,6 @@ class AcPredict(nn.Module):
     def _device(self):
         return self._tm_11_full.device
 
-    def _get_hippo(self):
-        k = self._lsd
-        hippo = np.zeros([k,k], dtype=np.float32)
-        for i in range(k):
-            for j in range(k):
-                if i==j:
-                    hippo[i,i]=1
-                elif i<k:
-                    hippo[i,j]=0
-                else:
-                    hippo[i,j]=np.sqrt(2*i+1)*np.sqrt(2*j+1)
-        return torch.Tensor(hippo)
 
     #   @torch.jit.script_method
     def forward(self, post_mean: torch.Tensor, post_cov: Iterable[torch.Tensor], action: torch.Tensor, latent_context: torch.Tensor) -> \
@@ -441,44 +367,27 @@ class AcPredict(nn.Module):
         if not self.c.kalman_linear:
             self._band_mask = nn.Parameter(torch.from_numpy(np.expand_dims(np_mask, 0)), requires_grad=False)
             self._eye_matrix = nn.Parameter(torch.eye(self._lod)[None, :, :], requires_grad=False)
-            if self.c.hippo:
-                hippo_mat = -self._get_hippo()
-                self._tm_11_full = nn.Parameter(
-                    hippo_mat[:self._lod, :self._lod][None, :, :].repeat(self.c.num_basis, 1, 1))
-                self._tm_12_full = \
-                    nn.Parameter(hippo_mat[:self._lod, self._lod:][None, :, :].repeat(self.c.num_basis, 1, 1))
-                self._tm_21_full = \
-                    nn.Parameter(hippo_mat[self._lod:, :self._lod][None, :, :].repeat(self.c.num_basis, 1, 1))
-                self._tm_22_full = nn.Parameter(
-                    hippo_mat[self._lod:, self._lod:][None, :, :].repeat(self.c.num_basis, 1, 1))
-            else:
-                self._tm_11_full = nn.Parameter(torch.zeros(self.c.num_basis, self._lod, self._lod, dtype=self._dtype))
-                self._tm_12_full = \
-                    nn.Parameter(
-                        0.2 * torch.eye(self._lod, dtype=self._dtype)[None, :, :].repeat(self.c.num_basis, 1, 1))
-                self._tm_21_full = \
-                    nn.Parameter(
-                        -0.2 * torch.eye(self._lod, dtype=self._dtype)[None, :, :].repeat(self.c.num_basis, 1, 1))
-                self._tm_22_full = nn.Parameter(torch.zeros(self.c.num_basis, self._lod, self._lod, dtype=self._dtype))
+
+            self._tm_11_full = nn.Parameter(torch.zeros(self.c.num_basis, self._lod, self._lod, dtype=self._dtype))
+            self._tm_12_full = \
+                nn.Parameter(
+                    0.2 * torch.eye(self._lod, dtype=self._dtype)[None, :, :].repeat(self.c.num_basis, 1, 1))
+            self._tm_21_full = \
+                nn.Parameter(
+                    -0.2 * torch.eye(self._lod, dtype=self._dtype)[None, :, :].repeat(self.c.num_basis, 1, 1))
+            self._tm_22_full = nn.Parameter(torch.zeros(self.c.num_basis, self._lod, self._lod, dtype=self._dtype))
 
         else:
             self._band_mask = nn.Parameter(torch.from_numpy(np_mask), requires_grad=False)
             self._eye_matrix = nn.Parameter(torch.eye(self._lod), requires_grad=False)
-            if self.c.hippo:
-                hippo_mat = -self._get_hippo()
-                self._tm_11_full = nn.Parameter(hippo_mat[:self._lod, :self._lod])
-                self._tm_12_full = \
-                    nn.Parameter(hippo_mat[:self._lod, self._lod:])
-                self._tm_21_full = \
-                    nn.Parameter(hippo_mat[self._lod:, :self._lod])
-                self._tm_22_full = nn.Parameter(hippo_mat[self._lod:, self._lod:])
-            else:
-                self._tm_11_full = nn.Parameter(torch.zeros(self._lod, self._lod, dtype=self._dtype))
-                self._tm_12_full = \
-                    nn.Parameter(0.2 * torch.eye(self._lod, dtype=self._dtype))
-                self._tm_21_full = \
-                    nn.Parameter(-0.2 * torch.eye(self._lod, dtype=self._dtype))
-                self._tm_22_full = nn.Parameter(torch.zeros(self._lod, self._lod, dtype=self._dtype))
+
+
+            self._tm_11_full = nn.Parameter(torch.zeros(self._lod, self._lod, dtype=self._dtype))
+            self._tm_12_full = \
+                nn.Parameter(0.2 * torch.eye(self._lod, dtype=self._dtype))
+            self._tm_21_full = \
+                nn.Parameter(-0.2 * torch.eye(self._lod, dtype=self._dtype))
+            self._tm_22_full = nn.Parameter(torch.zeros(self._lod, self._lod, dtype=self._dtype))
 
         self._transition_matrices_raw = [self._tm_11_full, self._tm_12_full, self._tm_21_full, self._tm_22_full]
 
@@ -536,20 +445,10 @@ class AcPredict(nn.Module):
             tm22 = tm22_full * self._band_mask
             tm22 += self._eye_matrix
 
-
-        if self.c.additive_linear_task or self.c.additive_linear_task_factorized:
-            lm_full = self._task_matrix
-        elif self.c.additive_l_linear_task_factorized:
-            lm_full = self._task_matrix
-            lm_full = (coefficients_task * lm_full).sum(dim=1)
-        else:
-            lm_full = None
-
-
         process_cov = elup1(self._log_process_noise())
 
 
-        return [tm11, tm12, tm21, tm22], lm_full, process_cov
+        return [tm11, tm12, tm21, tm22], process_cov
 
 
 
@@ -567,11 +466,9 @@ class AcPredict(nn.Module):
 
         # compute state dependent transition matrix
 
-        [tm11, tm12, tm21, tm22], lm, process_covar = self.get_transition_model(post_mean, latent_context)
+        [tm11, tm12, tm21, tm22], process_covar = self.get_transition_model(post_mean, latent_context)
 
         control_factor = self._control_net(action)
-
-
 
         # predict next prior mean
 
@@ -589,23 +486,6 @@ class AcPredict(nn.Module):
             var_prior_1 = self._task_net_var(var_context)
             mu_prior = mu_prior_0 + mu_prior_1
             var_prior = [x+y for x,y in zip(var_prior_0,var_prior_1)]
-        elif self.c.additive_nl_task_deterministic:
-            mu_prior_1 = self._task_net_mu(mu_context)
-            mu_prior = mu_prior_0 + mu_prior_1
-            var_prior = var_prior_0
-        elif self.c.additive_linear_task:
-            mu_prior_1, var_prior_1 = gaussian_linear_transform_task(lm, mu_context, var_context)
-            mu_prior = mu_prior_0 + mu_prior_1
-            var_prior = [x + y for x, y in zip(var_prior_0, var_prior_1)]
-        elif self.c.additive_linear_task_factorized:
-            mu_prior_1, var_prior_1 = gaussian_linear_transform_task_factorized(lm, mu_context, var_context)
-            mu_prior = mu_prior_0 + mu_prior_1
-            var_prior = [x + y for x, y in zip(var_prior_0, var_prior_1)]
-        elif self.c.additive_l_linear_task_factorized:
-            mu_prior_1, var_prior_1 = gaussian_l_linear_transform_task_factorized(lm, mu_context, var_context)
-            mu_prior = mu_prior_0 + mu_prior_1
-            var_prior = [x + y for x, y in zip(var_prior_0, var_prior_1)]
-
         else:
             mu_prior = mu_prior_0
             var_prior = var_prior_0
@@ -613,10 +493,6 @@ class AcPredict(nn.Module):
 
         return mu_prior, var_prior
 
-
-
-    def _linear_transform(self, mean, cov, matrix):
-        return matrix*mean, matrix*cov*matrix.transpose()
 
 
 

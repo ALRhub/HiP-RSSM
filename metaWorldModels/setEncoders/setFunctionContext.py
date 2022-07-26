@@ -13,25 +13,13 @@ def elup1(x: torch.Tensor) -> torch.Tensor:
     return torch.exp(x).where(x < 0.0, x + 1.0)
 
 class SetEncoder(nn.Module):
-    @staticmethod
-    def get_default_config() -> OmegaConf:
-        s = """
-             encoder_hidden_units: [240]
-             aggregator: 'BA'
-             enc_out_norm: 'post'
-             variance_act: 'softplus'
-            """
-
-        return OmegaConf.create(s)
 
     def __init__(self, input_dim:int, lod: int,  config: ConfigDict = None, use_cuda_if_available: bool = True):
-        """Gaussian Encoder, as described in ICML Paper (if output_normalization=post)
+        """The set encoder that calculates the posterior over latent context.
         :param input_dim: input dimension of each set element
         :param lod: latent observation dim, i.e. output dim of the Encoder mean and var
-        :param output_normalization: when to normalize the output:
-            - post: after output layer (as described in ICML paper)
-            - pre: after last hidden layer, that seems to work as well in most cases but is a bit more principled
-            - none: (or any other string) not at all
+        :param config: dict of config
+        :param use_cuda_if_available: if gpu training set to True
         """
         super().__init__()
         self._device = torch.device("cuda" if torch.cuda.is_available() and use_cuda_if_available else "cpu")
