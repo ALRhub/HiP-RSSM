@@ -42,8 +42,8 @@ How To Run Baselines
 -------------
 With ```HiP-RSSM``` as the working directory execute the python script
 * LSTM Baseline:
-```python experiments/mobileRobot/mobile_robot_lstm.py model=default_lstm```
+```python experiments/mobileRobot/mobile_robot_rnn.py model=default_lstm```
 * GRU Baseline:
-```python experiments/mobileRobot/mobile_robot_lstm.py model=default_lstm```
+```python experiments/mobileRobot/mobile_robot_rnn.py model=default_gru```
 * RKN Baseline:
 ```python experiments/mobileRobot/mobile_robot_hiprssm.py model=default_rkn```
