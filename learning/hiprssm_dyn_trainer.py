@@ -11,8 +11,6 @@ import wandb
 from metaWorldModels.hiprssm import HipRSSM
 from utils.dataProcess import split_k_m, get_ctx_target_impute
 from utils.Losses import mse, gaussian_nll
-from utils.PositionEmbedding import PositionEmbedding as pe
-from utils import ConfigDict
 from utils.plotTrajectory import plotImputation
 from utils.latentVis import plot_clustering
 
@@ -37,7 +35,6 @@ class Learn:
         self._loss = loss
         self._imp = imp
         self._model = model
-        self._pe = pe(self._device)
         self._exp_name = run.name + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         if config is None:
             raise TypeError('Pass a Config Dict')

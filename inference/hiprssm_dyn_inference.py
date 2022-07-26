@@ -7,7 +7,6 @@ from metaWorldModels.hiprssm import HipRSSM
 from torch.utils.data import TensorDataset, DataLoader
 from utils.dataProcess import split_k_m, get_sliding_context_batch_mbrl, get_ctx_target_multistep, get_ctx_target_impute,\
     squeeze_sw_batch, diffToStateMultiStep, diffToState, diffToStateImpute
-from utils import ConfigDict
 
 optim = torch.optim
 nn = torch.nn

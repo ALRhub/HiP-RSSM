@@ -1,5 +1,4 @@
 import torch
-from utils.ConfigDict import ConfigDict
 from omegaconf import DictConfig, OmegaConf
 
 nn = torch.nn
@@ -14,7 +13,7 @@ def elup1(x: torch.Tensor) -> torch.Tensor:
 
 class SetEncoder(nn.Module):
 
-    def __init__(self, input_dim:int, lod: int,  config: ConfigDict = None, use_cuda_if_available: bool = True):
+    def __init__(self, input_dim:int, lod: int,  config: OmegaConf = None, use_cuda_if_available: bool = True):
         """The set encoder that calculates the posterior over latent context.
         :param input_dim: input dimension of each set element
         :param lod: latent observation dim, i.e. output dim of the Encoder mean and var

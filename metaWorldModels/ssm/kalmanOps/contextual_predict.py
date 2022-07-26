@@ -1,7 +1,5 @@
 import torch
 import numpy as np
-from omegaconf import DictConfig, OmegaConf
-from utils.ConfigDict import ConfigDict
 from typing import Iterable, Tuple, List
 
 nn = torch.nn
@@ -288,7 +286,7 @@ class Coefficient(nn.Module):
 
 class AcPredict(nn.Module):
 
-    def __init__(self, ltd: int, latent_obs_dim: int, act_dim: int, config: ConfigDict = None, dtype: torch.dtype = torch.float32):
+    def __init__(self, ltd: int, latent_obs_dim: int, act_dim: int, config = None, dtype: torch.dtype = torch.float32):
         """
         RKN Cell (mostly) as described in the original RKN paper
         :param latent_obs_dim: latent observation dimension
@@ -309,7 +307,6 @@ class AcPredict(nn.Module):
         self._dtype = dtype
 
         self._build_transition_model()
-        self._build_task_model()
 
         self._task_net_mu = TaskNetMu(self._ltd, self._lsd, self.c.task_net_hidden_units,self.c.task_net_hidden_activation)
         self._task_net_var = TaskNetVar(self._ltd, self._lsd, self.c.task_net_hidden_units, self.c.nl_diagonal,
@@ -393,17 +390,6 @@ class AcPredict(nn.Module):
 
         self._transition_matrices_raw = [self._tm_11_full, self._tm_12_full, self._tm_21_full, self._tm_22_full]
 
-    def _build_task_model(self) -> None:
-        """
-        Builds the basis functions for transition model and the noise
-        :return:
-        """
-        if self.c.additive_linear_task:
-            self._task_matrix = nn.Parameter(torch.rand((self._lsd, self._lod), dtype=self._dtype)[None, :])
-        if self.c.additive_linear_task_factorized:
-            self._task_matrix = nn.Parameter(torch.rand((self._lsd), dtype=self._dtype)[None, :])
-        if self.c.additive_l_linear_task_factorized:
-            self._task_matrix = nn.Parameter(torch.rand((self.c.num_basis, self._lsd), dtype=self._dtype)[None, :])
 
     def get_transition_model(self, post_mean: torch.Tensor, latent_context: torch.Tensor) -> Tuple[List[torch.Tensor], torch.Tensor]:
         """

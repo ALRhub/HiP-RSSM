@@ -1,13 +1,11 @@
 import torch
-import numpy as np
-from utils.ConfigDict import ConfigDict
 from typing import Iterable, Tuple, List
 nn = torch.nn
 
 class Update(nn.Module):
 
 
-    def __init__(self, latent_obs_dim: int, config: ConfigDict, dtype: torch.dtype = torch.float32):
+    def __init__(self, latent_obs_dim: int, config=None, dtype: torch.dtype = torch.float32):
         """
         RKN Cell (mostly) as described in the original RKN paper
         :param latent_obs_dim: latent observation dimension
