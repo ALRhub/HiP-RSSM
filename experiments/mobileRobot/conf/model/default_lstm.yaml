@@ -19,7 +19,6 @@ lstm:
   enc_out_norm: 'post'
   clip_gradients: True
   never_invalid: False
-  get_latent: False
   gru: False
 
 

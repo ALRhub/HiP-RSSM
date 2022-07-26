@@ -36,7 +36,6 @@ class LSTMBaseline(nn.Module):
         self._enc_out_normalization = self.c.enc_out_norm
 
         # main model
-        # Its not ugly, its pythonic :)
         EncoderSimple._build_hidden_layers = self._build_obs_hidden_layers
         obs_enc = EncoderSimple(lod, output_normalization=self._enc_out_normalization)
         EncoderSimple._build_hidden_layers = self._build_act_hidden_layers
@@ -105,8 +104,6 @@ class LSTMBaseline(nn.Module):
 
         out_mean, out_var = self._dec(z)
 
-        if self.c.get_latent:
-            return out_mean, out_var, prior_mean, prior_cov
-        else:
-            return out_mean, out_var
+
+        return out_mean, out_var
 

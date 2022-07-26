@@ -1,14 +1,14 @@
 wandb:
   log: True
-  project_name: 'HiPPO'
-  exp_name: 'mobile-hiprssm'
+  project_name: 'HiP-RSSM'
+  exp_name: 'mobile-rkn'
   sweep: False
   sweep_id: null
 
 learn:
   load: False
   gpu: '0'
-  epochs: 2
+  epochs: 2500
   batch_size: 350
   latent_vis: False
   plot_traj: False

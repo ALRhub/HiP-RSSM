@@ -159,7 +159,7 @@ class Experiment():
                                                             multiStep=step, tar=tar_type)
             rmse_next_state, pred_obs, gt_obs = root_mean_squared(pred_mean, gt, data.normalizer, tar="observations", denorma=True)
             wandb_run.summary['rmse_multi_step_' + str(step)] = rmse_next_state
-            print(rmse_next_state)
+            print(step,"Step Ahead Prediction RMSE:",rmse_next_state)
 
 
 
