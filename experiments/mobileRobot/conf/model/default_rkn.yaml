@@ -1,37 +1,33 @@
 wandb:
   log: True
-  project_name: 'baselines-mobile-diff-----'
-  exp_name: 'mobile-acrkn'
+  project_name: 'HiPPO'
+  exp_name: 'mobile-hiprssm'
   sweep: False
   sweep_id: null
 
 learn:
   load: False
   gpu: '0'
-  epochs: 2500
+  epochs: 2
   batch_size: 350
   latent_vis: False
   plot_traj: False
-  lr: 9e-4
+  lr: 8e-4
   save_model: True
-  loss: 'mse'
+  loss: 'nll'
 
-np:
+hiprssm:
   clip_gradients: True
   latent_obs_dim: 30
-  agg_dim: 60
-
+  task_dim: 60
 
 set_encoder:
   encoder_hidden_units: [240]
   aggregator: 'BA'
-  time_embed: {'type':None, 'dim': 0}
   enc_out_norm: 'post'
   variance_act: 'softplus'
 
 ssm_decoder:
-  hippo: True
-  kvae: False
   kalman_linear: False
   num_basis: 15
   bandwidth: 3
@@ -47,21 +43,8 @@ ssm_decoder:
   task_net_hidden_activation: 'ReLU'
   learn_trans_covar: True
   decoder_conditioning: False
-  intuitive_conditioning: False
-  context_mu_flag_coeff: False
-  context_mu_flag_control: False
-  context_mu_flag_noise: False
-  context_var_flag_coeff: False
-  context_var_flag_control: False
-  context_var_flag_noise: False
-  additive_linear_task: False
-  additive_linear_task_factorized: False
-  additive_l_linear_task_factorized: False
   additive_nl_task: False
-  additive_nl_task_deterministic: False
-  nl_diagonal: True
-  additive_ll_task: False
-  hyper_transition_matrix: False
+  nl_diagonal: False
   multi_gaussian_l_transform: False
   trans_covar: 0.1
   learn_initial_state_covar: False
@@ -70,24 +53,22 @@ ssm_decoder:
   clip_gradients: True
   never_invalid: False
   variance_act: 'softplus'
-  num_heads: 1
 
 data_reader:
-  imp: 0.50
+  imp: 0 #How much imputation you need... For multistep ahead prediction we train with an imputation percentage of 0.75
   terrain: 'sin2'
   frequency: '500'
   meta_batch_size: 3000
   batch_size: 150
-  tar_type: 'delta'
+  tar_type: 'delta' # Use "delta" argument to predict on the differences as targets. In other cases use "observations".
   load: null
   save: 1
-  dim: 111
   standardize: True
   split:
     - [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49]
     - [30,31,32,33,34,35,36,37,38,39,40]
   shuffle_split: null
-  file_name: 'AntWindows_123_0'
+  file_name: 'MobileWindows'
   trajPerTask: 10
 
 submitit:
