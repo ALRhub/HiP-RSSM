@@ -14,7 +14,8 @@ learn:
   plot_traj: False
   lr: 8e-4
   save_model: True
-  loss: 'nll'
+  loss: 'mse' # can be "mse" or "nll". In the paper we reported results while trianing with mse loss.
+              # But changing it to negative log likelihood "nll" works as well.
 
 hiprssm:
   clip_gradients: True
