@@ -151,7 +151,6 @@ class acrknContextualDecoder(nn.Module):
         :param target_batch: batch of target sequences
         :param decode: whether to decode next_prior
         """
-        conditional = False
         latent_task_mu = torch.unsqueeze(latent_task, 1).repeat(1, obs_batch.shape[1], 1) #only for conditional cases
         if conditional:
             w, w_var = self._enc(torch.cat([obs_batch, latent_task_mu[:, :, :self._ltd]], dim=-1))
